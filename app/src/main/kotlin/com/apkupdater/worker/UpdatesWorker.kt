@@ -1,11 +1,7 @@
 package com.apkupdater.worker
 
 import android.content.Context
-import androidx.work.CoroutineWorker
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
-import androidx.work.WorkerParameters
+import androidx.work.*
 import com.apkupdater.prefs.Prefs
 import com.apkupdater.repository.UpdatesRepository
 import com.apkupdater.util.UpdatesNotification
@@ -15,13 +11,8 @@ import org.koin.core.component.inject
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
-
-class UpdatesWorker(
-    context: Context,
-    workerParams: WorkerParameters
-): CoroutineWorker(context, workerParams), KoinComponent {
-
-    companion object: KoinComponent {
+class UpdatesWorker(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams), KoinComponent {
+    companion object : KoinComponent {
         private const val TAG = "UpdatesWorker"
         private val prefs: Prefs by inject()
 
@@ -38,10 +29,10 @@ class UpdatesWorker(
 
         private fun randomDelay() = Random.nextLong(0, 59 * 60 * 1_000)
 
-        private fun getDays() = when(prefs.alarmFrequency.get()) {
-            0 -> 1L
-            1 -> 3L
-            2 -> 7L
+        private fun getDays() = when (prefs.alarmFrequency.get()) {
+            0    -> 1L
+            1    -> 3L
+            2    -> 7L
             else -> 1L
         }
     }
@@ -57,5 +48,4 @@ class UpdatesWorker(
         }
         return Result.success()
     }
-
 }

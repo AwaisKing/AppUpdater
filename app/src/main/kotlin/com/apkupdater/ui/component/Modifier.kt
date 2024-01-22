@@ -18,28 +18,31 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.IntSize
 import com.apkupdater.ui.theme.statusBarColor
 
-
 fun Modifier.shimmering(enabled: Boolean): Modifier = composed {
     if (enabled) {
         var size by remember { mutableStateOf(IntSize.Zero) }
         val transition = rememberInfiniteTransition("shimmering")
         val color = MaterialTheme.colorScheme.statusBarColor()
         val startOffsetX by transition.animateFloat(
-            label = "shimmering",
-            initialValue = -2 * size.width.toFloat(),
-            targetValue = 2 * size.width.toFloat(),
-            animationSpec = infiniteRepeatable(animation = tween(1000))
+                label = "shimmering",
+                initialValue = -2 * size.width.toFloat(),
+                targetValue = 2 * size.width.toFloat(),
+                animationSpec = infiniteRepeatable(animation = tween(1000))
         )
         background(
-            brush = Brush.linearGradient(
-                colors = listOf(
-                    color.copy(alpha = 0.9f),
-                    color.copy(alpha = 0.3f),
-                    color.copy(alpha = 0.9f)
-                ),
-                start = Offset(startOffsetX, 0f),
-                end = Offset(startOffsetX + size.width.toFloat(), size.height.toFloat())
-            )
+                brush = Brush.linearGradient(
+                        colors = listOf(
+                                color.copy(alpha = 0.3f),
+                                color.copy(alpha = 0.5f),
+                                color.copy(alpha = 0.7f),
+                                color.copy(alpha = 0.9f),
+                                color.copy(alpha = 0.7f),
+                                color.copy(alpha = 0.5f),
+                                color.copy(alpha = 0.3f),
+                        ),
+                        start = Offset(startOffsetX, 0f),
+                        end = Offset(startOffsetX + size.width.toFloat(), size.height.toFloat())
+                )
         ).onGloballyPositioned {
             size = it.size
         }

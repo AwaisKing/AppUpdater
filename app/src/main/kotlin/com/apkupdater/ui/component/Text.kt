@@ -3,26 +3,16 @@ package com.apkupdater.ui.component
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Badge
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.AnnotatedString
@@ -34,9 +24,6 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
-import com.apkupdater.prefs.Prefs
-import org.koin.androidx.compose.get
-
 
 @Composable
 fun TextBubble(code: Long, modifier: Modifier = Modifier) = TextBubble(
@@ -69,7 +56,7 @@ fun SmallText(text: String, modifier: Modifier = Modifier) = Text(
 fun MediumText(
     text: String,
     modifier: Modifier = Modifier,
-    maxLines: Int = 1
+    maxLines: Int = 1,
 ) = Text(
     text = text,
     style = MaterialTheme.typography.bodyMedium,
@@ -110,35 +97,28 @@ fun HugeText(text: String, modifier: Modifier = Modifier, maxLines: Int = 1) = T
 )
 
 @Composable
-fun ScrollableText(
-    modifier: Modifier = Modifier,
-    content: @Composable RowScope.() -> Unit
-) {
+fun ScrollableText(modifier: Modifier = Modifier, content: @Composable RowScope.() -> Unit) {
     val state = rememberScrollState()
     val inner = remember { mutableStateOf(IntSize.Zero) }
     val outer = remember { mutableStateOf(IntSize.Zero) }
 
-    if (get<Prefs>().playTextAnimations.get()) {
-        val effect: suspend (ScrollState) -> Unit = {
-            state.scrollTo(0)
-            val scroll = (inner.value.width - outer.value.width)
-            if (scroll > 0) {
-                while(true) {
-                    state.animateScrollTo(
-                        scroll,
-                        tween(delayMillis = 1000, durationMillis = scroll * 10, easing = LinearEasing)
-                    )
-                    state.animateScrollTo(
-                        0,
-                        tween(delayMillis = 1000, durationMillis = scroll * 10, easing = LinearEasing)
-                    )
-                }
-
+    val effect: suspend (ScrollState) -> Unit = {
+        state.scrollTo(0)
+        val scroll = (inner.value.width - outer.value.width)
+        if (scroll > 0) {
+            while (true) {
+                state.animateScrollTo(
+                    scroll,
+                    tween(delayMillis = 3000, durationMillis = scroll * 10, easing = LinearEasing)
+                )
+                state.animateScrollTo(
+                    0,
+                    tween(delayMillis = 3000, durationMillis = scroll * 10, easing = LinearEasing)
+                )
             }
         }
-        LaunchedEffect(outer.value) { effect(state) }
     }
-    
+    LaunchedEffect(outer.value) { effect(state) }
     Row(Modifier.onSizeChanged { outer.value = it }) {
         Row(
             modifier = Modifier
@@ -151,7 +131,6 @@ fun ScrollableText(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BadgeText(number: String) {
     if (number.isNotEmpty()) {
@@ -170,7 +149,7 @@ fun ExpandingAnnotatedText(
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     Text(
-        text =  if (text.text.last() == '\n') text.subSequence(0, text.length - 1) else text,
+        text = if (text.text.last() == '\n') text.subSequence(0, text.length - 1) else text,
         maxLines = if (isExpanded) Int.MAX_VALUE else minLines,
         style = style,
         overflow = TextOverflow.Ellipsis,

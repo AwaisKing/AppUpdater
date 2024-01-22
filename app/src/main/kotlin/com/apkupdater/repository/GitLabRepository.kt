@@ -8,7 +8,6 @@ import com.apkupdater.data.ui.AppInstalled
 import com.apkupdater.data.ui.AppUpdate
 import com.apkupdater.data.ui.GitLabSource
 import com.apkupdater.data.ui.getApp
-import com.apkupdater.prefs.Prefs
 import com.apkupdater.service.GitLabService
 import com.apkupdater.util.combine
 import com.apkupdater.util.filterVersionTag
@@ -18,17 +17,12 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 
-
-class GitLabRepository(
-    private val service: GitLabService,
-    private val prefs: Prefs
-) {
-
+class GitLabRepository(private val service: GitLabService) {
     suspend fun updates(apps: List<AppInstalled>) = flow {
         val checks = mutableListOf<Flow<List<AppUpdate>>>()
         GitLabApps.forEach { app ->
             apps.find { it.packageName == app.packageName }?.let {
-                checks.add(checkApp(apps, app.user, app.repo, app.packageName, it.version, null))
+                checks.add(checkApp(apps, app.user, app.repo, app.packageName, it.version))
             }
         }
         if (checks.isEmpty()) {
@@ -44,7 +38,6 @@ class GitLabRepository(
         repo: String,
         packageName: String,
         currentVersion: String,
-        extra: Regex?
     ) = flow {
         val releases = service.getReleases(user, repo)
             .filter { Version(filterVersionTag(it.tag_name)) > Version(currentVersion) }
@@ -53,17 +46,17 @@ class GitLabRepository(
             val app = apps?.getApp(packageName)
             emit(listOf(
                 AppUpdate(
-                name = repo,
-                packageName = packageName,
-                version = releases[0].tag_name,
-                oldVersion = app?.version ?: "?",
-                versionCode = 0L,
-                oldVersionCode = app?.versionCode ?: 0L,
-                source = GitLabSource,
-                link = getApkUrl(packageName, releases[0]),
-                whatsNew = releases[0].description,
-                iconUri = if (apps == null) Uri.parse(releases[0].author.avatar_url) else Uri.EMPTY
-            )))
+                    name = repo,
+                    packageName = packageName,
+                    version = releases[0].tag_name,
+                    oldVersion = app?.version ?: "?",
+                    versionCode = 0L,
+                    oldVersionCode = app?.versionCode ?: 0L,
+                    source = GitLabSource,
+                    link = getApkUrl(packageName, releases[0]),
+                    whatsNew = releases[0].description,
+                    iconUri = if (apps == null) Uri.parse(releases[0].author.avatar_url) else Uri.EMPTY
+                )))
         } else {
             emit(emptyList())
         }
@@ -77,7 +70,7 @@ class GitLabRepository(
 
         GitLabApps.forEach { app ->
             if (app.repo.contains(text, true) || app.user.contains(text, true) || app.packageName.contains(text, true)) {
-                checks.add(checkApp(null, app.user, app.repo, app.packageName, "?", null))
+                checks.add(checkApp(null, app.user, app.repo, app.packageName, "?"))
             }
         }
 
@@ -96,7 +89,7 @@ class GitLabRepository(
 
     private fun getApkUrl(
         packageName: String,
-        release: GitLabRelease
+        release: GitLabRelease,
     ): String {
         // TODO: Take into account arch
         val source = release.assets.sources.find { it.url.endsWith(".apk", true) }

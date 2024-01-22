@@ -46,10 +46,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.apkupdater.R
 
-
+@Preview
 @Composable
 fun SliderSetting(
     getValue: () -> Float,
@@ -57,7 +58,7 @@ fun SliderSetting(
     text: String,
     valueRange: ClosedFloatingPointRange<Float>,
     steps: Int,
-    @DrawableRes icon: Int
+    @DrawableRes icon: Int,
 ) = Row(
     Modifier
         .fillMaxWidth()
@@ -91,7 +92,7 @@ fun SegmentedButtonSetting(
     options: List<String>,
     getValue: () -> Int,
     setValue: (Int) -> Unit,
-    @DrawableRes icon: Int = R.drawable.ic_system
+    @DrawableRes icon: Int = R.drawable.ic_system,
 ) = Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp)) {
     var position by remember { mutableIntStateOf(getValue()) }
     Icon(painterResource(id = icon), text, Modifier.align(CenterVertically))
@@ -100,7 +101,8 @@ fun SegmentedButtonSetting(
         SingleChoiceSegmentedButtonRow(Modifier.padding(8.dp).fillMaxWidth()) {
             options.forEachIndexed { index, label ->
                 SegmentedButton(
-                    shape = SegmentedButtonDefaults.shape(position = index, count = options.size),
+                    // shape = SegmentedButtonDefaults.shape(position = index, count = options.size),
+                    shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
                     onClick = {
                         position = index
                         setValue(position)
@@ -119,8 +121,8 @@ fun SwitchSetting(
     getValue: () -> Boolean,
     setValue: (Boolean) -> Unit,
     text: String,
-    @DrawableRes icon: Int = R.drawable.ic_system
-) = Box (Modifier.fillMaxWidth().height(60.dp).padding(horizontal = 16.dp)) {
+    @DrawableRes icon: Int = R.drawable.ic_system,
+) = Box(Modifier.fillMaxWidth().height(60.dp).padding(horizontal = 16.dp)) {
     var value by remember { mutableStateOf(getValue()) }
     Row(Modifier.align(CenterStart)) {
         Icon(
@@ -149,7 +151,7 @@ fun DropDownSetting(
     getValue: () -> Int,
     setValue: (Int) -> Unit,
     @DrawableRes icon: Int,
-    width: Int = 100
+    width: Int = 100,
 ) = Box(Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 8.dp).fillMaxWidth()) {
     var expanded by remember { mutableStateOf(false) }
     var selectedOptionText by remember { mutableStateOf(options[getValue()]) }
@@ -160,7 +162,7 @@ fun DropDownSetting(
             text,
             Modifier.align(CenterVertically).padding(end = 16.dp).size(24.dp)
         )
-        Text(text,  Modifier.align(CenterVertically))
+        Text(text, Modifier.align(CenterVertically))
     }
     ExposedDropdownMenuBox(
         expanded = expanded,
@@ -202,7 +204,7 @@ fun TextFieldSetting(
     valueRange: IntRange = 0..23,
     getValue: () -> Int,
     setValue: (Int) -> Unit,
-    @DrawableRes icon: Int
+    @DrawableRes icon: Int,
 ) = Box(Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 8.dp).fillMaxWidth()) {
 
     var value by remember { mutableStateOf(getValue().toString()) }
@@ -213,7 +215,7 @@ fun TextFieldSetting(
             text,
             Modifier.align(CenterVertically).padding(end = 16.dp).size(24.dp)
         )
-        Text(text,  Modifier.align(CenterVertically))
+        Text(text, Modifier.align(CenterVertically))
     }
     OutlinedTextField(
         modifier = Modifier
@@ -247,7 +249,7 @@ fun ButtonSetting(
     text: String,
     onClick: () -> Unit,
     @DrawableRes icon: Int,
-    @DrawableRes iconButton: Int
+    @DrawableRes iconButton: Int,
 ) = Row(
     Modifier
         .fillMaxWidth()

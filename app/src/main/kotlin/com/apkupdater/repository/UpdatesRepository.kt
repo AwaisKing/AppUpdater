@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 
-
 class UpdatesRepository(
     private val appsRepository: AppsRepository,
     private val apkMirrorRepository: ApkMirrorRepository,
@@ -19,13 +18,12 @@ class UpdatesRepository(
     private val aptoideRepository: AptoideRepository,
     private val apkPureRepository: ApkPureRepository,
     private val gitLabRepository: GitLabRepository,
-    private val prefs: Prefs
+    private val prefs: Prefs,
 ) {
-
     fun updates() = flow<List<AppUpdate>> {
         appsRepository.getApps().collect { result ->
             result.onSuccess { apps ->
-                val filtered = apps.filter { !it.ignored }
+                val filtered = apps.filter { appInstalled -> !appInstalled.ignored }
                 val sources = mutableListOf<Flow<List<AppUpdate>>>()
                 if (prefs.useApkMirror.get()) sources.add(apkMirrorRepository.updates(filtered))
                 if (prefs.useGitHub.get()) sources.add(gitHubRepository.updates(filtered))
@@ -35,13 +33,8 @@ class UpdatesRepository(
                 if (prefs.useApkPure.get()) sources.add(apkPureRepository.updates(filtered))
                 if (prefs.useGitLab.get()) sources.add(gitLabRepository.updates(filtered))
 
-                if (sources.isNotEmpty()) {
-                    sources
-                        .combine { updates -> emit(updates.flatMap { it }) }
-                        .collect()
-                } else {
-                    emit(emptyList())
-                }
+                if (sources.isNotEmpty()) sources.combine { updates -> emit(updates.flatMap { it }) }.collect()
+                else emit(emptyList())
             }.onFailure {
                 Log.e("UpdatesRepository", "Error getting apps", it)
             }
@@ -49,5 +42,4 @@ class UpdatesRepository(
     }.catch {
         Log.e("UpdatesRepository", "Error getting updates", it)
     }
-
 }

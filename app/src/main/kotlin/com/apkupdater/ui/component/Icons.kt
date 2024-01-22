@@ -1,26 +1,21 @@
+@file:Suppress("DEPRECATION")
+
 package com.apkupdater.ui.component
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltipBox
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import com.apkupdater.R
 import com.apkupdater.data.ui.Source
-import com.apkupdater.util.clickableNoRipple
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,50 +66,21 @@ fun SourceIcon(source: Source, modifier: Modifier = Modifier) = Icon(
     modifier
 )
 
-@Composable
-fun IgnoreIcon(ignored: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) = Icon(
-    painter = painterResource(
-        id = if(ignored) R.drawable.ic_visible_off else R.drawable.ic_visible
-    ),
-    contentDescription = stringResource(if (ignored) R.string.unignore_cd else R.string.ignore_cd),
-    modifier = Modifier.clickableNoRipple(onClick).then(modifier)
-)
-
-@Composable
-fun InstallIcon(onClick: () -> Unit, modifier: Modifier = Modifier) = Icon(
-    painter = painterResource(R.drawable.ic_install),
-    contentDescription = stringResource(R.string.install_cd),
-    modifier = Modifier.clickableNoRipple(onClick).then(modifier)
-)
-
-@Composable
-fun BoxScope.InstallProgressIcon(
-    isInstalling: Boolean,
-    onClick: () -> Unit
-) {
-    if(isInstalling) {
-        CircularProgressIndicator(
-            Modifier.align(Alignment.TopEnd).size(30.dp).padding(4.dp),
-            color = MaterialTheme.colorScheme.primary
-        )
-    }
-    else {
-        InstallIcon(
-            { onClick() },
-            Modifier.align(Alignment.TopEnd).padding(4.dp)
-        )
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RefreshIcon(
-    text: String,
-    modifier: Modifier = Modifier
-) = PlainTooltipBox(tooltip = { Text(text) }) {
+fun TooltipIcon(text: String, resId: Int, modifier: Modifier = Modifier) = PlainTooltipBox(tooltip = { Text(text) }) {
     Icon(
-        painter = painterResource(id = R.drawable.ic_refresh),
+        painter = painterResource(id = resId),
         contentDescription = text,
         modifier = Modifier.tooltipTrigger().then(modifier)
     )
 }
+
+@Composable
+fun PlayStoreIcon(modifier: Modifier = Modifier) =
+        TooltipIcon(stringResource(R.string.open_in_store), R.drawable.gplay,
+                    modifier.padding(Dp(8f)))
+
+@Composable
+fun RefreshIcon(modifier: Modifier = Modifier) =
+        TooltipIcon(stringResource(R.string.refresh_updates), R.drawable.ic_refresh, modifier)

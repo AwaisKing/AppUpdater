@@ -1,21 +1,21 @@
 package com.apkupdater.util
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.apkupdater.R
 import com.apkupdater.ui.activity.MainActivity
 
 class UpdatesNotification(private val context: Context) {
-
     companion object {
         const val UpdateAction = "updateAction"
     }
@@ -26,7 +26,6 @@ class UpdatesNotification(private val context: Context) {
     private val updateTitle = context.getString(R.string.notification_update_title)
     private val updateId = 42
 
-    @SuppressLint("MissingPermission")
     fun showUpdateNotification(num: Int) {
         // Intent for the notification click
         val intent = Intent(context, MainActivity::class.java).apply {
@@ -43,9 +42,8 @@ class UpdatesNotification(private val context: Context) {
             .setAutoCancel(true)
 
         createNotificationChannel()
-        if (areNotificationsEnabled()) {
-            NotificationManagerCompat.from(context).notify(updateId, builder.build())
-        }
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+            && areNotificationsEnabled()) NotificationManagerCompat.from(context).notify(updateId, builder.build())
     }
 
     fun checkNotificationPermission(launcher: ManagedActivityResultLauncher<String, Boolean>) {
@@ -56,17 +54,13 @@ class UpdatesNotification(private val context: Context) {
         }
     }
 
-    private fun areNotificationsEnabled() = NotificationManagerCompat
-        .from(context)
-        .areNotificationsEnabled()
+    private fun areNotificationsEnabled() = NotificationManagerCompat.from(context).areNotificationsEnabled()
 
     private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT).apply {
-                description = context.getString(R.string.notification_channel_description)
-            }
-            notificationManager.createNotificationChannel(channel)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT).apply {
+            description = context.getString(R.string.notification_channel_description)
         }
+        notificationManager.createNotificationChannel(channel)
     }
-
 }

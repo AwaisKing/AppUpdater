@@ -22,9 +22,7 @@ sealed class UpdatesUiState {
 	}
 
 	fun mutableUpdates(): MutableList<AppUpdate> {
-		if (this is Success) {
-			return updates.toMutableList()
-		}
+		if (this is Success) return updates.toMutableList()
 		return mutableListOf()
 	}
 
